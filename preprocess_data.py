@@ -10,19 +10,21 @@ RAW_DATASETS = {
     "spectral": {
         "raw_path": Path("data/SC_spec_251.mat"),  # Raw spectral-domain data file
         "output_dir": Path("data/spectral"),  # Preprocessed spectral-domain output directory
+        "normalization": "dBm",  # Spectral data is represented on a clipped logarithmic scale
     },
     "time": {
         "raw_path": Path("data/SC_time_276.mat"),  # Raw time-domain data file
         "output_dir": Path("data/time"),  # Preprocessed time-domain output directory
+        "normalization": "max",  # Temporal data remains on a linear intensity scale
     },
 }
 
 
-def dBm_normalize(data: np.ndarray, dynamic_range_db: float) -> tuple[np.ndarray, float]:
-    """Normalize data in dBm style: global max scaling, log transform, clipping, and 0-1 mapping."""
+def normalize_spectral_dBm(data: np.ndarray, dynamic_range_db: float) -> tuple[np.ndarray, dict]:
+    """Normalize spectral data with global max scaling, log transform, clipping, and 0-1 mapping."""
     max_value = float(np.max(np.abs(data)))
     if max_value <= 0:
-        raise ValueError("The maximum value of the raw data is zero; dBm normalization cannot be performed.")
+        raise ValueError("The maximum value of the spectral data is zero; dBm normalization cannot be performed.")
 
     normalized = data / max_value
     with np.errstate(divide="ignore", invalid="ignore"):
@@ -32,7 +34,45 @@ def dBm_normalize(data: np.ndarray, dynamic_range_db: float) -> tuple[np.ndarray
     db_data[db_data < -dynamic_range_db] = -dynamic_range_db
     db_data = db_data / dynamic_range_db + 1.0
     db_data = np.clip(db_data, 0.0, 1.0).astype(np.float32)
-    return db_data, max_value
+    metadata = {
+        "normalization": "dBm",
+        "max_value": max_value,
+        "dynamic_range_db": dynamic_range_db,
+    }
+    return db_data, metadata
+
+
+def normalize_temporal_linear(data: np.ndarray) -> tuple[np.ndarray, dict]:
+    """Normalize temporal intensity data linearly with a global maximum absolute value."""
+    max_value = float(np.max(np.abs(data)))
+    if max_value <= 0:
+        raise ValueError("The maximum value of the temporal data is zero; linear normalization cannot be performed.")
+
+    normalized = np.clip(data / max_value, 0.0, 1.0).astype(np.float32)
+    metadata = {
+        "normalization": "max",
+        "max_value": max_value,
+        "dynamic_range_db": np.nan,
+    }
+    return normalized, metadata
+
+
+def normalize_dataset(
+    dataset_name: str,
+    data: np.ndarray,
+    normalization: str,
+    dynamic_range_db: float,
+) -> tuple[np.ndarray, dict]:
+    """Apply the domain-specific normalization selected for a raw dataset."""
+    if normalization == "dBm":
+        normalized_data, metadata = normalize_spectral_dBm(data, dynamic_range_db)
+    elif normalization == "max":
+        normalized_data, metadata = normalize_temporal_linear(data)
+    else:
+        raise ValueError(f"Unsupported normalization for {dataset_name}: {normalization}")
+
+    metadata["dataset_name"] = dataset_name
+    return normalized_data, metadata
 
 
 def prepare_output_dir(output_dir: Path, overwrite: bool) -> tuple[Path, Path]:
@@ -74,6 +114,7 @@ def preprocess_one_dataset(
     dataset_name: str,
     raw_path: Path,
     output_dir: Path,
+    normalization: str,
     train_ratio: float,
     dynamic_range_db: float,
     overwrite: bool,
@@ -92,9 +133,16 @@ def preprocess_one_dataset(
         raise ValueError(f"Data in {raw_path} should be a 3D array; actual shape: {raw_data.shape}")
 
     print(f"[Data] Original shape: {raw_data.shape}")
-    normalized_data, max_value = dBm_normalize(raw_data, dynamic_range_db)
-    print(f"[Normalization] Global maximum value: {max_value:.10g}")
-    print(f"[Normalization] Dynamic range: {dynamic_range_db:g} dB")
+    normalized_data, norm_metadata = normalize_dataset(
+        dataset_name,
+        raw_data,
+        normalization,
+        dynamic_range_db,
+    )
+    print(f"[Normalization] Method: {norm_metadata['normalization']}")
+    print(f"[Normalization] Global maximum value: {norm_metadata['max_value']:.10g}")
+    if norm_metadata["normalization"] == "dBm":
+        print(f"[Normalization] Dynamic range: {dynamic_range_db:g} dB")
     print(
         f"[Normalization] Normalized range: "
         f"{float(normalized_data.min()):.6f} ~ {float(normalized_data.max()):.6f}"
@@ -109,9 +157,10 @@ def preprocess_one_dataset(
 
     metadata = {
         "source_file": str(raw_path),
-        "normalization": "dBm",
-        "max_value": max_value,
-        "dynamic_range_db": dynamic_range_db,
+        "dataset_name": dataset_name,
+        "normalization": norm_metadata["normalization"],
+        "max_value": norm_metadata["max_value"],
+        "dynamic_range_db": norm_metadata["dynamic_range_db"],
         "sample_count": sample_count,
         "train_count": train_count,
         "val_count": sample_count - train_count,
@@ -168,6 +217,7 @@ def main() -> None:
             dataset_name=name,
             raw_path=item["raw_path"],
             output_dir=item["output_dir"],
+            normalization=item["normalization"],
             train_ratio=args.train_ratio,
             dynamic_range_db=args.dynamic_range_db,
             overwrite=args.overwrite,
