@@ -70,6 +70,7 @@ python main.py
 ## 📰 News
 
 - **May 2026** — PSc-MoE manuscript completed
+- **May 2026** — Paper submitted
 - **May 2026** — Code released
 
 ## Acknowledgements
