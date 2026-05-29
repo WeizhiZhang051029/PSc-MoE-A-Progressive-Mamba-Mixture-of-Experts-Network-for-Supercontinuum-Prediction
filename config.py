@@ -10,8 +10,8 @@ OMP_NUM_THREADS = "1"  # Number of OpenMP threads; increase it on servers if nee
 MKL_NUM_THREADS = "1"  # Number of MKL threads; increase it on servers if needed
 
 # --- Training parameters ---
-EPOCHS = 1000  # Maximum number of training epochs
-LR = 1e-5  # Learning rate
+EPOCHS = 10000  # Maximum number of training epochs
+LR = 0.0001  # Learning rate
 BATCH_SIZE = 16  # Number of samples per batch
 SEED = 42  # Random seed for reproducibility
 LOAD_TRAINED_WEIGHTS = False  # Whether to continue training from an existing checkpoint
