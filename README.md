@@ -13,9 +13,9 @@ We propose PSc-MoE, a progressive Mamba mixture-of-experts network for rapid sup
 Create a new conda environment and install the required packages using the `requirements.txt` file.
 
 ```bash
-conda create -n psc-moe python=3.10
-conda activate psc-moe
-pip install -r requirements.txt
+conda create _n psc_moe python=3.10
+conda activate psc_moe
+pip install _r requirements.txt
 ```
 
 ## 📊 Dataset
