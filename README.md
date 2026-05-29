@@ -35,7 +35,7 @@ python preprocess_data.py
 Train the model:
 
 ```bash
-python train.py
+python main.py
 ```
 
 Run testing or inference:
