@@ -22,11 +22,30 @@ pip install _r requirements.txt
 
 This work uses the open-source fibre-optics simulation dataset released with **Predicting ultrafast nonlinear dynamics in fibre optics with a recurrent neural network**.
 
-Please download and prepare the dataset from Zenodo:
+Please download the dataset from Zenodo:
 
 [https://zenodo.org/records/4304771](https://zenodo.org/records/4304771)
 
-After downloading the `.mat` data files, set the corresponding data path in `config.py`.
+After downloading, create a folder named `data` in the root directory of this repository, and place the open-source data files `SC_spec_251.mat` and `SC_time_276.mat` into this folder.
+
+The expected directory structure is:
+
+```text
+.
+├── data/
+│   ├── SC_spec_251.mat
+│   └── SC_time_276.mat
+├── preprocess_data.py
+├── train.py
+├── main.py
+└── ...
+```
+
+Then run the following command for data preprocessing:
+
+```bash
+python preprocess_data.py
+```
 
 ## 🚀 Running
 
