@@ -35,7 +35,7 @@ KERNEL_PARAMS = [(1, 0), (3, 1), (5, 2)]  # Encoder kernel sizes and padding val
 EXPERT_DIM = 256  # Internal channel size for expert networks
 GLOBAL_COND_DIM = 256  # Global condition vector dimension
 NUM_EXPERTS = 4  # Number of experts in each MoE stage
-TOP_K = 4  # Number of activated experts for each sample
+TOP_K = 2  # Number of activated experts for each sample
 MOE_AUX_WEIGHT = 0.01  # Weight of the expert load-balancing auxiliary loss
 
 # --- Data loading parameters ---
