@@ -6,7 +6,7 @@ The official repository for [**PSc-MoE: A Progressive Mamba Mixture-of-Experts N
 
 ![Image](images/fig01_psc_moe_overall_architecture_01.png)
 
-We propose PSc-MoE, a progressive Mamba mixture-of-experts network for rapid supercontinuum (SC) prediction and nonlinear optical-system optimization. Conventional numerical simulations based on the generalized nonlinear Schrödinger equation (GNLSE) suffer from high computational costs, while existing deep-learning models still struggle to characterize the evolutionary differences associated with different input spectra and propagation stages. PSc-MoE employs a Progressive Propagation Decoder (PPD) to progressively reconstruct the spectral evolution process according to different propagation stages. Meanwhile, an SC Multi-Expert Routing Module (Sc-MER) dynamically selects expert branches through an input-related sparse gating mechanism, thereby enhancing the modeling capability for deep spectral features. Experimental results show that PSc-MoE achieves an MSE of `1.306 × 10^-5` and an inference speed of `118.51 FPS`.
+We propose PSc-MoE, a progressive Mamba mixture-of-experts network for rapid supercontinuum (SC) prediction. To reduce the high computational cost of GNLSE-based simulations, PSc-MoE reconstructs the complete SC evolution map from a single initial spectrum. It employs a Progressive Propagation Decoder (PPD) for staged spectral-evolution reconstruction and an SC Multi-Expert Routing Module (Sc-MER) for input-related sparse expert selection. Experimental results show that PSc-MoE achieves an MSE of `1.306 × 10^-5` and an inference speed of `118.51 FPS`.
 
 ## Installation
 
